@@ -2,6 +2,13 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const helmet = require('helmet');
+
+const server = http.createServer(app);
+
+app.use(helmet({
+    contentSecurityPolicy: false, // Нужно, чтобы socket.io работал без ошибок
+}));
 
 app.use(express.static('public'));
 

@@ -38,14 +38,20 @@ document.addEventListener('click', (e) => {
     }
 
     // Слушаем клик по кнопке "Отправить"
-    if (e.target && e.target.id === 'send-btn') {
-        const input = document.getElementById('message-input');
-        if (input.value) {
-            socket.emit('chat message', { text: input.value, user: userName });
-            input.value = '';
-        }
+    if (button) {
+        button.onclick = () => {
+            // Проверяем: не пустое ли поле и не слишком ли длинное (макс 500 символов)
+            if (input.value.trim() && input.value.length < 500) {
+                socket.emit('chat message', { 
+                    text: input.value.trim(), 
+                    user: userName.substring(0, 20) // Ограничиваем ник 20 символами
+                });
+                input.value = '';
+            } else if (input.value.length >= 500) {
+                alert("Сообщение слишком длинное!");
+            }
+        };
     }
-});
 
 // Слушаем сообщения от сервера
 socket.on('chat message', (data) => {
@@ -55,12 +61,20 @@ socket.on('chat message', (data) => {
     const div = document.createElement('div');
     div.classList.add('message');
     div.classList.add(data.user === userName ? 'mine' : 'theirs');
-    div.innerHTML = `<b>${data.user}:</b> ${data.text}`;
+
+    // БЕЗОПАСНЫЙ СПОСОБ: используем textContent для текста сообщения
+    const userSpan = document.createElement('b');
+    userSpan.textContent = data.user + ": "; // Экранирует имя
+    
+    const textSpan = document.createElement('span');
+    textSpan.textContent = data.text; // Экранирует само сообщение
+
+    div.appendChild(userSpan);
+    div.appendChild(textSpan);
     
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
 });
-
 // Устанавливаем твое имя в шапку при старте
 document.addEventListener('DOMContentLoaded', () => {
     const headerName = document.querySelector('.user-details .user-name');
