@@ -1,30 +1,60 @@
-const express = require('express');
-const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const helmet = require('helmet');
+const socket = io();
 
-const server = http.createServer(app);
+// 1. Берем ключ из ссылки (например, ?key=123)
+const urlParams = new URLSearchParams(window.location.search);
+const accessKey = urlParams.get('key');
 
-app.use(helmet({
-    contentSecurityPolicy: false, // Нужно, чтобы socket.io работал без ошибок
-}));
+// 2. Секретный ключ, который должен быть в ссылке
+const SECRET_KEY = "твой_секретный_код_здесь"; 
 
-app.use(express.static('public'));
+if (accessKey === SECRET_KEY) {
+    // Если ключ верный, спрашиваем имя и запускаем чат
+    const userName = prompt("Введите ваш никнейм:", "Друг") || "Аноним";
+    initChat(userName);
+} else {
+    // Если ключа нет или он неверный — блокируем вход
+    document.body.innerHTML = `
+        <div style="color: white; background: #0f0c29; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; text-align: center;">
+            <div>
+                <h1 style="font-size: 50px;">🔒</h1>
+                <h2>Доступ закрыт</h2>
+                <p>Для входа нужна секретная ссылка.</p>
+            </div>
+        </div>
+    `;
+}
 
-io.on('connection', (socket) => {
-    console.log('Друг подключился к JopaZvon!');
+function initChat(userName) {
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('message-input');
+    const button = document.getElementById('send-btn');
+    const headerName = document.querySelector('.user-name');
+    const headerLetter = document.getElementById('avatar-letter');
+
+    document.getElementById('main-wrapper').style.display = 'flex';
+    headerName.innerText = userName;
+    headerLetter.innerText = userName[0].toUpperCase();
+
+    button.onclick = () => {
+        if (input.value.trim()) {
+            socket.emit('chat message', { text: input.value, user: userName });
+            input.value = '';
+        }
+    };
 
     socket.on('chat message', (data) => {
-        io.emit('chat message', data); // Отправка всем
+        const div = document.createElement('div');
+        div.classList.add('message');
+        div.classList.add(data.user === userName ? 'mine' : 'theirs');
+        
+        const b = document.createElement('b');
+        b.textContent = data.user + ": ";
+        const span = document.createElement('span');
+        span.textContent = data.text;
+        
+        div.appendChild(b);
+        div.appendChild(span);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
     });
-
-    socket.on('disconnect', () => {
-        console.log('Кто-то вышел из сети');
-    });
-});
-
-const PORT = 3000;
-http.listen(PORT, () => {
-    console.log(`Сервер запущен: http://localhost:${PORT}`);
-});
+}

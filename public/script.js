@@ -1,85 +1,60 @@
-// Подключаемся к серверу
 const socket = io();
 
-// Сразу запрашиваем имя. Если не ввел — будет "Аноним"
-const userName = prompt("Как тебя зовут?") || "Аноним";
+// 1. Берем ключ из ссылки (например, ?key=123)
+const urlParams = new URLSearchParams(window.location.search);
+const accessKey = urlParams.get('key');
 
-// Функция для добавления контакта в список слева
-function addContactToList(name) {
-    const contactsList = document.getElementById('contacts-list');
-    if (!contactsList) return;
+// 2. Секретный ключ, который должен быть в ссылке
+const SECRET_KEY = "super_jopazvon_pozvoni_kakashka_ale_ale"; 
 
-    const item = document.createElement('div');
-    item.classList.add('contact-item');
-    const firstLetter = name.charAt(0).toUpperCase();
-    
-    item.innerHTML = `
-        <div class="avatar-mini">${firstLetter}</div>
-        <div class="contact-info">
-            <div style="font-weight:600">${name}</div>
-            <div style="font-size:12px; color:rgba(255,255,255,0.5)">Нажми, чтобы написать</div>
+if (accessKey === SECRET_KEY) {
+    // Если ключ верный, спрашиваем имя и запускаем чат
+    const userName = prompt("Введите ваш никнейм:", "Друг") || "Аноним";
+    initChat(userName);
+} else {
+    // Если ключа нет или он неверный — блокируем вход
+    document.body.innerHTML = `
+        <div style="color: white; background: #0f0c29; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; text-align: center;">
+            <div>
+                <h1 style="font-size: 50px;">🔒</h1>
+                <h2>Доступ закрыт</h2>
+                <p>Для входа нужна секретная ссылка.</p>
+            </div>
         </div>
     `;
-
-    // При клике меняем данные в шапке чата
-    item.onclick = () => {
-        document.querySelector('.user-details .user-name').innerText = name;
-        document.getElementById('avatar-letter').innerText = firstLetter;
-    };
-
-    contactsList.appendChild(item);
 }
 
-// Слушаем клик по кнопке "Найти контакт"
-document.addEventListener('click', (e) => {
-    if (e.target && e.target.id === 'find-contact-btn') {
-        const contactName = prompt("Введите имя друга:");
-        if (contactName) addContactToList(contactName);
-    }
-
-    // Слушаем клик по кнопке "Отправить"
-    if (button) {
-        button.onclick = () => {
-            // Проверяем: не пустое ли поле и не слишком ли длинное (макс 500 символов)
-            if (input.value.trim() && input.value.length < 500) {
-                socket.emit('chat message', { 
-                    text: input.value.trim(), 
-                    user: userName.substring(0, 20) // Ограничиваем ник 20 символами
-                });
-                input.value = '';
-            } else if (input.value.length >= 500) {
-                alert("Сообщение слишком длинное!");
-            }
-        };
-    }
-
-// Слушаем сообщения от сервера
-socket.on('chat message', (data) => {
+function initChat(userName) {
     const messages = document.getElementById('messages');
-    if (!messages) return;
-
-    const div = document.createElement('div');
-    div.classList.add('message');
-    div.classList.add(data.user === userName ? 'mine' : 'theirs');
-
-    // БЕЗОПАСНЫЙ СПОСОБ: используем textContent для текста сообщения
-    const userSpan = document.createElement('b');
-    userSpan.textContent = data.user + ": "; // Экранирует имя
-    
-    const textSpan = document.createElement('span');
-    textSpan.textContent = data.text; // Экранирует само сообщение
-
-    div.appendChild(userSpan);
-    div.appendChild(textSpan);
-    
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-});
-// Устанавливаем твое имя в шапку при старте
-document.addEventListener('DOMContentLoaded', () => {
-    const headerName = document.querySelector('.user-details .user-name');
+    const input = document.getElementById('message-input');
+    const button = document.getElementById('send-btn');
+    const headerName = document.querySelector('.user-name');
     const headerLetter = document.getElementById('avatar-letter');
-    if (headerName) headerName.innerText = userName;
-    if (headerLetter) headerLetter.innerText = userName.charAt(0).toUpperCase();
+
+    document.getElementById('main-wrapper').style.display = 'flex';
+    headerName.innerText = userName;
+    headerLetter.innerText = userName[0].toUpperCase();
+
+    button.onclick = () => {
+        if (input.value.trim()) {
+            socket.emit('chat message', { text: input.value, user: userName });
+            input.value = '';
+        }
+    };
+
+    socket.on('chat message', (data) => {
+        const div = document.createElement('div');
+        div.classList.add('message');
+        div.classList.add(data.user === userName ? 'mine' : 'theirs');
+        
+        const b = document.createElement('b');
+        b.textContent = data.user + ": ";
+        const span = document.createElement('span');
+        span.textContent = data.text;
+        
+        div.appendChild(b);
+        div.appendChild(span);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
     });
-});
+}
