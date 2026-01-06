@@ -1,0 +1,287 @@
+#main-wrapper {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background: #0f0c29;
+}
+
+/* Левая панель */
+#sidebar {
+    width: 300px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h3 { color: white; margin-bottom: 10px; }
+
+#find-contact-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 10px;
+    border: none;
+    background: #5162ff;
+    color: white;
+    cursor: pointer;
+}
+
+#contacts-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Элемент контакта в списке */
+.contact-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
+}
+
+.contact-item:hover { background: rgba(255, 255, 255, 0.05); }
+
+.contact-item .avatar-mini {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #7184ff; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: bold;
+}
+
+.contact-info { color: white; font-size: 14px; }
+
+/* Правая часть чата теперь занимает остаток места */
+#chat-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+/* Обнуляем отступы, чтобы приложение прилипало к краям */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Чтобы не было лишней прокрутки экрана */
+}
+
+body {
+    background: linear-gradient(180deg, #0f0c29 0%, #24243e 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+/* Контейнер теперь занимает 100% экрана */
+#chat-container {
+    width: 100%;
+    height: 100%;
+    max-width: 100%; /* Убираем ограничения */
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(40px);
+    display: flex;
+    flex-direction: column;
+    box-shadow: none;
+}
+
+header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+#messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    /* Добавляем красивый фон для области сообщений */
+    background: radial-gradient(circle at center, rgba(0, 122, 255, 0.05) 0%, transparent 70%);
+}
+
+.message {
+    padding: 12px 18px;
+    border-radius: 22px;
+    max-width: 75%;
+    color: white;
+    font-size: 16px;
+    line-height: 1.4;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mine {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #007aff, #0055ff);
+    border-bottom-right-radius: 4px; /* Стиль «хвостика» iOS */
+}
+
+.theirs {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.12);
+    border-bottom-left-radius: 4px;
+}
+
+.input-area {
+    padding: 15px 20px 35px 20px; /* Больше отступа снизу для мобильных экранов */
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+input {
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    padding: 12px 20px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+input:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #007aff;
+}
+
+#send-btn {
+    /* Тот самый фиолетово-синий градиент со скрина */
+    background: linear-gradient(135deg, #7184ff 0%, #5162ff 100%);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 20px; /* Более мягкое закругление iOS */
+    font-weight: 600;
+    font-size: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    cursor: pointer;
+    
+    /* Тень, которая создает эффект объема */
+    box-shadow: 0 4px 12px rgba(81, 98, 255, 0.4);
+    
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    outline: none;
+}
+
+#send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(81, 98, 255, 0.5);
+    filter: brightness(1.05);
+}
+
+#send-btn:active {
+    transform: scale(0.94);
+    filter: brightness(0.95);
+    box-shadow: 0 2px 8px rgba(81, 98, 255, 0.3);
+}
+header {
+    height: 80px;
+    padding: 0 25px; /* Отступ слева, чтобы не прилипало к краю */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Выравнивание всего контента по левому краю */
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Расстояние между аватаркой и текстом */
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7184ff 0%, #5162ff 100%);
+    box-shadow: 0 0 15px rgba(81, 98, 255, 0.3);
+    /* Центрируем букву */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    text-transform: uppercase; /* Всегда заглавная */
+}
+
+/* Стили для аватарок внутри сообщений (если захотим добавить их и туда) */
+.msg-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); /* Другой цвет для собеседника */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+}
+
+.online-status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #4cd964; /* Насыщенный зеленый iOS */
+    border: 2px solid #1c1c1e; /* Темный ободок, чтобы точка выделялась */
+    border-radius: 50%;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.user-name {
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.4px; /* Плотный шрифт в стиле Apple */
+}
+
+.user-status {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+}
