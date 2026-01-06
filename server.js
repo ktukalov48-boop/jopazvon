@@ -1,28 +1,60 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+const socket = io();
 
-const app = express();
-const server = http.createServer(app);
-// Вот здесь мы ОПРЕДЕЛЯЕМ io, чтобы ошибки не было
-const io = new Server(server);
+// 1. Берем ключ из ссылки (например, ?key=123)
+const urlParams = new URLSearchParams(window.location.search);
+const accessKey = urlParams.get('key');
 
-app.use(express.static('public'));
+// 2. Секретный ключ, который должен быть в ссылке
+const SECRET_KEY = "твой_секретный_код_здесь"; 
 
-io.on('connection', (socket) => {
-    console.log('Пользователь подключился');
+if (accessKey === SECRET_KEY) {
+    // Если ключ верный, спрашиваем имя и запускаем чат
+    const userName = prompt("Введите ваш никнейм:", "Друг") || "Аноним";
+    initChat(userName);
+} else {
+    // Если ключа нет или он неверный — блокируем вход
+    document.body.innerHTML = `
+        <div style="color: white; background: #0f0c29; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; text-align: center;">
+            <div>
+                <h1 style="font-size: 50px;">🔒</h1>
+                <h2>Доступ закрыт</h2>
+                <p>Для входа нужна секретная ссылка.</p>
+            </div>
+        </div>
+    `;
+}
+
+function initChat(userName) {
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('message-input');
+    const button = document.getElementById('send-btn');
+    const headerName = document.querySelector('.user-name');
+    const headerLetter = document.getElementById('avatar-letter');
+
+    document.getElementById('main-wrapper').style.display = 'flex';
+    headerName.innerText = userName;
+    headerLetter.innerText = userName[0].toUpperCase();
+
+    button.onclick = () => {
+        if (input.value.trim()) {
+            socket.emit('chat message', { text: input.value, user: userName });
+            input.value = '';
+        }
+    };
 
     socket.on('chat message', (data) => {
-        io.emit('chat message', data);
+        const div = document.createElement('div');
+        div.classList.add('message');
+        div.classList.add(data.user === userName ? 'mine' : 'theirs');
+        
+        const b = document.createElement('b');
+        b.textContent = data.user + ": ";
+        const span = document.createElement('span');
+        span.textContent = data.text;
+        
+        div.appendChild(b);
+        div.appendChild(span);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
     });
-
-    socket.on('disconnect', () => {
-        console.log('Пользователь отключился');
-    });
-});
-
-// Используем порт от Render или 3000 локально
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Сервер JopaZvon запущен на порту ${PORT}`);
-});
+}
