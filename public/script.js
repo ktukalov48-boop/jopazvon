@@ -1,59 +1,56 @@
 const socket = io();
 
+// 1. НАСТРОЙКА КЛЮЧА
+const SECRET_KEY = "super_jopazvon_pozvoni_kakashka_ale_ale"; 
 
+// 2. ПРОВЕРКА КЛЮЧА
 const urlParams = new URLSearchParams(window.location.search);
 const accessKey = urlParams.get('key');
 
-
-const SECRET_KEY = "super_jopazvon_pozvoni_kakashka_ale_ale"; 
-
 if (accessKey === SECRET_KEY) {
-    
-    const userName = prompt("Введите ваш никнейм:", "Друг") || "Аноним";
+    const userName = prompt("Ваш никнейм:", "Друг") || "Аноним";
     initChat(userName);
 } else {
-    
     document.body.innerHTML = `
-        <div style="color: white; background: #0f0c29; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; text-align: center;">
-            <div>
-                <h1 style="font-size: 50px;">🔒</h1>
-                <h2>Доступ закрыт</h2>
-                <p>Для входа нужна секретная ссылка.</p>
-            </div>
-        </div>
-    `;
+        <div style="color: white; background: #1c1c1e; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; text-align: center;">
+            <div><h1>🔒 Доступ закрыт</h1><p>Нужна секретная ссылка.</p></div>
+        </div>`;
 }
 
+// 3. ЛОГИКА ЧАТА (запускается только если ключ верный)
 function initChat(userName) {
-    const messages = document.getElementById('messages');
-    const input = document.getElementById('message-input');
-    const button = document.getElementById('send-btn');
-    const headerName = document.querySelector('.user-name');
-    const headerLetter = document.getElementById('avatar-letter');
-
     document.getElementById('main-wrapper').style.display = 'flex';
-    headerName.innerText = userName;
-    headerLetter.innerText = userName[0].toUpperCase();
+    
+    const input = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const findBtn = document.getElementById('find-contact-btn');
+    const messages = document.getElementById('messages');
 
-    button.onclick = () => {
+    // Шапка
+    document.querySelector('.user-name').innerText = userName;
+    document.getElementById('avatar-letter').innerText = userName[0].toUpperCase();
+
+    // Кнопка ОТПРАВИТЬ
+    sendBtn.onclick = () => {
         if (input.value.trim()) {
             socket.emit('chat message', { text: input.value, user: userName });
             input.value = '';
         }
     };
 
+    // Отправка по Enter
+    input.onkeypress = (e) => { if (e.key === 'Enter') sendBtn.click(); };
+
+    // Кнопка НАЙТИ
+    findBtn.onclick = () => {
+        alert("Поиск временно недоступен. Отправьте ссылку другу, чтобы он появился в сети!");
+    };
+
+    // Получение сообщений
     socket.on('chat message', (data) => {
         const div = document.createElement('div');
-        div.classList.add('message');
-        div.classList.add(data.user === userName ? 'mine' : 'theirs');
-        
-        const b = document.createElement('b');
-        b.textContent = data.user + ": ";
-        const span = document.createElement('span');
-        span.textContent = data.text;
-        
-        div.appendChild(b);
-        div.appendChild(span);
+        div.classList.add('message', data.user === userName ? 'mine' : 'theirs');
+        div.innerHTML = `<b>${data.user}:</b> <span>${data.text}</span>`;
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
     });
