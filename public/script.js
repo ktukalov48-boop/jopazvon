@@ -1,18 +1,18 @@
 const socket = io();
 
-// 1. Берем ключ из ссылки (например, ?key=123)
+
 const urlParams = new URLSearchParams(window.location.search);
 const accessKey = urlParams.get('key');
 
-// 2. Секретный ключ, который должен быть в ссылке
+
 const SECRET_KEY = "super_jopazvon_pozvoni_kakashka_ale_ale"; 
 
 if (accessKey === SECRET_KEY) {
-    // Если ключ верный, спрашиваем имя и запускаем чат
+    
     const userName = prompt("Введите ваш никнейм:", "Друг") || "Аноним";
     initChat(userName);
 } else {
-    // Если ключа нет или он неверный — блокируем вход
+    
     document.body.innerHTML = `
         <div style="color: white; background: #0f0c29; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; text-align: center;">
             <div>
