@@ -81,4 +81,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerLetter = document.getElementById('avatar-letter');
     if (headerName) headerName.innerText = userName;
     if (headerLetter) headerLetter.innerText = userName.charAt(0).toUpperCase();
+    });
 });
